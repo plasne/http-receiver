@@ -42,6 +42,7 @@ switch (format) {
 
 // receive
 app.all("/", (req, res) => {
+    console.log(new Date());
     console.log(`METHOD = "${req.method}"`);
     console.log(req.headers);
     console.log(req.body);
