@@ -18,7 +18,8 @@ const format       = cmd.format       || process.env.FORMAT        || "json";
 const responseCode = cmd.responseCode || process.env.RESPONSE_CODE || 200;
 
 // log
-console.log(`FORMAT = "${format}"`);
+console.log(`FORMAT        = "${format}"`);
+console.log(`RESPONSE_CODE = "${responseCode}"`);
 
 // startup express
 const app = express();
