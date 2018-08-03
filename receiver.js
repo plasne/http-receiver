@@ -70,6 +70,11 @@ app.all("/", (req, res) => {
     res.status(RESPONSE_CODE).end();
 });
 
+// for health probes
+app.all("/health", (_, res) => {
+    res.status(200).end();
+});
+
 // listen for web traffic
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...\n`);

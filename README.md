@@ -1,0 +1,1 @@
+docker run -d -p 80:80 -e "USERNAME=user" -e "PASSWORD=asjdflkasdjflka" http-receiver
