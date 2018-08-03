@@ -50,18 +50,21 @@ switch (FORMAT) {
 }
 
 // support basic authentication
-if (USERNAME && PASSWORD) {
-    const users = {};
-    users[USERNAME] = PASSWORD;
-    app.use(basicAuth({
-        users: users,
-        challenge: true
-    }));
-    console.log("Basic Auth will be required.");
+function mayRequireAuth(req, res, next) {
+    if (USERNAME && PASSWORD) {
+        const users = {};
+        users[USERNAME] = PASSWORD;
+        return basicAuth({
+            users: users,
+            challenge: true
+        })(req, res, next);
+    } else {
+        next();
+    }
 }
 
 // receive
-app.all("/", (req, res) => {
+app.all("/", mayRequireAuth, (req, res) => {
     console.log(new Date());
     console.log(`METHOD = "${req.method}"`);
     console.log(req.headers);
@@ -77,5 +80,7 @@ app.all("/health", (_, res) => {
 
 // listen for web traffic
 app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}...\n`);
+    console.log(`Listening on port ${PORT}...`);
+    if (USERNAME && PASSWORD) console.log("Basic Auth will be required.");
+    console.log("");
 });
