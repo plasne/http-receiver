@@ -34,17 +34,20 @@ const app = express();
 switch (FORMAT) {
     case "json":
         app.use(bodyParser.json({
-            limit: "50mb"
+            limit: "50mb",
+            type: "*/*"
         }));
         break;
     case "text":
         app.use(bodyParser.text({
-            limit: "50mb"
+            limit: "50mb",
+            type: "*/*"
         }));
         break;
     default:
         app.use(bodyParser.raw({
-            limit: "50mb"
+            limit: "50mb",
+            type: "*/*"
         }));
         break;
 }
