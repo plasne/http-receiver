@@ -14,7 +14,7 @@ cmd.version('0.1.0')
     .option(
         '-f, --format <string>',
         `FORMAT. The format of the body ("text", "json", or "none"). Defaults to "json".`,
-        /^(text|json)$/i
+        /^(text|json|none)$/i
     )
     .option(
         '-s, --show <string>',
