@@ -1,4 +1,4 @@
-FROM node:10-alpine
+FROM node:14-alpine
 COPY receiver.js receiver.js
 COPY package.json package.json
 COPY package-lock.json package-lock.json

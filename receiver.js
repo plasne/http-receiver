@@ -1,4 +1,6 @@
 // includes
+const os = require('os');
+const fs = require('fs');
 const cmd = require('commander');
 const express = require('express');
 const basicAuth = require('express-basic-auth');
@@ -26,12 +28,20 @@ cmd.version('0.1.0')
         parseInt
     )
     .option(
+        '-r, --response-body <filepath>',
+        `RESPONSE_BODY. If specified, the specified text file will be sent as the body.`
+    )
+    .option(
         '-u, --username <string>',
         `USERNAME. The server will require the specified username using Basic Auth. If you specify this you must also specify the PASSWORD.`
     )
     .option(
         '-p, --password <string>',
         `PASSWORD. The server will require the specified password using Basic Auth. If you specify this you must also specify the USERNAME.`
+    )
+    .option(
+        '-i, --id <string>',
+        `IDENTIFIER. The X-Identifier response header will be added with this info. If not supplied, the host is used.`
     )
     .parse(process.argv);
 
@@ -40,16 +50,20 @@ const PORT = cmd.port || process.env.PORT || 8100;
 const FORMAT = cmd.format || process.env.FORMAT || 'json';
 const SHOW = cmd.show || process.env.SHOW || 'full';
 const RESPONSE_CODE = cmd.responseCode || process.env.RESPONSE_CODE || 200;
+const RESPONSE_BODY = cmd.responseBody || process.env.RESPONSE_BODY;
 const USERNAME = cmd.username || process.env.USERNAME;
 const PASSWORD = cmd.password || process.env.PASSWORD;
+const IDENTIFIER = cmd.id || process.env.IDENTIFIER || os.hostname();
 
 // log
 console.log(`PORT          = "${PORT}"`);
 console.log(`FORMAT        = "${FORMAT}"`);
 console.log(`SHOW          = "${SHOW}"`);
 console.log(`RESPONSE_CODE = "${RESPONSE_CODE}"`);
+console.log(`RESPONSE_BODY = "${RESPONSE_BODY}"`);
 console.log(`USERNAME      = "${USERNAME}"`);
 console.log(`PASSWORD      = "${PASSWORD}"`);
+console.log(`IDENTIFIER    = "${IDENTIFIER}"`);
 
 // startup express
 const app = express();
@@ -89,6 +103,12 @@ function mayRequireAuth(req, res, next) {
     }
 }
 
+// load the body, if appropriate
+var body;
+if (RESPONSE_BODY) {
+    body = fs.readFileSync(RESPONSE_BODY, 'utf8')
+}
+
 // receive
 app.all('*', mayRequireAuth, (req, res) => {
     console.log(new Date());
@@ -99,7 +119,12 @@ app.all('*', mayRequireAuth, (req, res) => {
     }
     console.log(req.body);
     console.log('');
-    res.status(RESPONSE_CODE).end();
+    res.header('X-Identifier', IDENTIFIER);
+    if (RESPONSE_BODY) {
+        res.status(RESPONSE_CODE).send(body);
+    } else {
+        res.status(RESPONSE_CODE).end();
+    }
 });
 
 // for health probes
