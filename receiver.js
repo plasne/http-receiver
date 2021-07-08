@@ -4,7 +4,6 @@ const fs = require('fs');
 const cmd = require('commander');
 const express = require('express');
 const basicAuth = require('express-basic-auth');
-const bodyParser = require('body-parser');
 
 // define command line parameters
 cmd.version('0.1.0')
@@ -72,20 +71,20 @@ switch (FORMAT) {
         break;
     case 'text':
         app.use(
-            bodyParser.text({
-                limit: '50mb',
-                type: '*/*',
-            })
+            (req, _, next) => {
+                req.setEncoding('utf8');
+                req.body = '';
+                req.on('data', function(chunk) {
+                    req.body += chunk;
+                });
+                req.on('end', function(){
+                    next();
+                });
+            }
         );
         break;
     default:
-        // json
-        app.use(
-            bodyParser.raw({
-                limit: '50mb',
-                type: '*/*',
-            })
-        );
+        app.use(express.json());
         break;
 }
 
