@@ -27,8 +27,12 @@ cmd.version('0.1.0')
         parseInt
     )
     .option(
-        '-r, --response-body <filepath>',
+        '-b, --response-body <filepath>',
         `RESPONSE_BODY. If specified, the specified text file will be sent as the body.`
+    )
+    .option(
+        '-h, --response-headers <string>',
+        `RESPONSE_HEADERS. If specified, the response will include the specified header. It should be in the format "key=value,key=value".`
     )
     .option(
         '-u, --username <string>',
@@ -50,19 +54,21 @@ const FORMAT = cmd.format || process.env.FORMAT || 'json';
 const SHOW = cmd.show || process.env.SHOW || 'full';
 const RESPONSE_CODE = cmd.responseCode || process.env.RESPONSE_CODE || 200;
 const RESPONSE_BODY = cmd.responseBody || process.env.RESPONSE_BODY;
+const RESPONSE_HEADERS = cmd.responseHeaders || process.env.RESPONSE_HEADERS;
 const USERNAME = cmd.username || process.env.USERNAME;
 const PASSWORD = cmd.password || process.env.PASSWORD;
 const IDENTIFIER = cmd.id || process.env.IDENTIFIER || os.hostname();
 
 // log
-console.log(`PORT          = "${PORT}"`);
-console.log(`FORMAT        = "${FORMAT}"`);
-console.log(`SHOW          = "${SHOW}"`);
-console.log(`RESPONSE_CODE = "${RESPONSE_CODE}"`);
-console.log(`RESPONSE_BODY = "${RESPONSE_BODY}"`);
-console.log(`USERNAME      = "${USERNAME}"`);
-console.log(`PASSWORD      = "${PASSWORD}"`);
-console.log(`IDENTIFIER    = "${IDENTIFIER}"`);
+console.log(`PORT             = "${PORT}"`);
+console.log(`FORMAT           = "${FORMAT}"`);
+console.log(`SHOW             = "${SHOW}"`);
+console.log(`RESPONSE_CODE    = "${RESPONSE_CODE}"`);
+console.log(`RESPONSE_BODY    = "${RESPONSE_BODY}"`);
+console.log(`RESPONSE_HEADERS = "${RESPONSE_HEADERS}"`);
+console.log(`USERNAME         = "${USERNAME}"`);
+console.log(`PASSWORD         = "${PASSWORD}"`);
+console.log(`IDENTIFIER       = "${IDENTIFIER}"`);
 
 // startup express
 const app = express();
@@ -119,6 +125,12 @@ app.all('*', mayRequireAuth, (req, res) => {
     console.log(req.body);
     console.log('');
     res.header('X-Identifier', IDENTIFIER);
+    if (RESPONSE_HEADERS) {
+        for (var header of RESPONSE_HEADERS.split(",")) {
+            var pair = header.trim().split("=", 2);
+            res.header(pair[0], pair[1]);
+        }
+    }
     if (RESPONSE_BODY) {
         res.status(RESPONSE_CODE).send(body);
     } else {
