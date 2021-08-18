@@ -46,6 +46,10 @@ cmd.version('0.1.0')
         '-i, --id <string>',
         `IDENTIFIER. The X-Identifier response header will be added with this info. If not supplied, the host is used.`
     )
+    .option(
+        '-d, --delay <integer>',
+        `DELAY. The response will be delayed by this number of milliseconds.`
+    )
     .parse(process.argv);
 
 // globals
@@ -58,6 +62,7 @@ const RESPONSE_HEADERS = cmd.responseHeaders || process.env.RESPONSE_HEADERS;
 const USERNAME = cmd.username || process.env.USERNAME;
 const PASSWORD = cmd.password || process.env.PASSWORD;
 const IDENTIFIER = cmd.id || process.env.IDENTIFIER || os.hostname();
+const DELAY = cmd.delay || process.env.DELAY || 0;
 
 // log
 console.log(`PORT             = "${PORT}"`);
@@ -69,6 +74,7 @@ console.log(`RESPONSE_HEADERS = "${RESPONSE_HEADERS}"`);
 console.log(`USERNAME         = "${USERNAME}"`);
 console.log(`PASSWORD         = "${PASSWORD}"`);
 console.log(`IDENTIFIER       = "${IDENTIFIER}"`);
+console.log(`DELAY            = "${IDENTIFIER}"`);
 
 // startup express
 const app = express();
@@ -115,7 +121,7 @@ if (RESPONSE_BODY) {
 }
 
 // receive
-app.all('*', mayRequireAuth, (req, res) => {
+app.all('*', mayRequireAuth, async (req, res) => {
     console.log(new Date());
     if (SHOW !== 'body') {
         console.log(`PATH = "${req.path}"`);
@@ -131,6 +137,7 @@ app.all('*', mayRequireAuth, (req, res) => {
             res.header(pair[0], pair[1]);
         }
     }
+    await new Promise(r => setTimeout(r, DELAY));
     if (RESPONSE_BODY) {
         res.status(RESPONSE_CODE).send(body);
     } else {
